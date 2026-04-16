@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KYP Clinical Review — Questionnaire</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --navy:#1a2744;--teal:#0d7a6e;--teal-lt:#e6f5f3;--teal-dk:#085048;
+    --gold:#b8912a;--red:#c0392b;--red-lt:#fdf0ee;
+    --bg:#f4f5f7;--surface:#ffffff;--border:#e0e2e8;--border-focus:#0d7a6e;
+    --text:#1a1a2e;--text2:#5a6070;--text3:#9ba3b2;
+  }
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+  a{color:var(--teal)}
+
+  /* HEADER */
+  .site-header{background:var(--navy);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between}
+  .site-logo{font-family:'DM Serif Display',serif;font-size:20px;color:#fff}
+  .site-logo span{color:#5dd6c8}
+  .site-badge{font-size:10px;font-weight:500;letter-spacing:.8px;color:#8fa8c8;text-transform:uppercase}
+
+  /* HERO */
+  .hero{background:linear-gradient(135deg,var(--navy) 0%,#243860 100%);padding:2.5rem 2rem;text-align:center;color:#fff}
+  .hero h1{font-family:'DM Serif Display',serif;font-size:26px;margin-bottom:.5rem}
+  .hero p{font-size:14px;color:#a8bcd4;max-width:560px;margin:0 auto;line-height:1.7}
+  .hero-meta{display:flex;justify-content:center;gap:2rem;margin-top:1.25rem;font-size:12px;color:#7a9bb8}
+  .hero-meta span{display:flex;align-items:center;gap:5px}
+
+  /* LAYOUT */
+  .form-wrap{max-width:720px;margin:0 auto;padding:2rem 1rem 4rem}
+
+  /* SECTIONS */
+  .sec-header{margin-bottom:1.25rem;margin-top:2rem;padding-bottom:.75rem;border-bottom:2px solid var(--border)}
+  .sec-header:first-child{margin-top:0}
+  .sec-label{font-size:10px;font-weight:500;letter-spacing:1.4px;text-transform:uppercase;color:var(--teal);margin-bottom:.3rem}
+  .sec-title{font-family:'DM Serif Display',serif;font-size:18px;color:var(--navy)}
+  .sec-desc{font-size:13px;color:var(--text2);margin-top:.25rem;line-height:1.6}
+
+  /* PROGRESS */
+  .progress-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem}
+  .progress-track{flex:1;background:#eef0f4;border-radius:4px;height:6px;overflow:hidden}
+  .progress-fill{height:100%;background:var(--teal);border-radius:4px;transition:width .4s ease}
+  .progress-text{font-size:12px;color:var(--text2);white-space:nowrap;min-width:80px;text-align:right}
+
+  /* CARDS */
+  .q-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:.875rem;transition:border-color .15s}
+  .q-card:focus-within{border-color:var(--teal)}
+  .q-num{font-size:10px;font-weight:500;color:var(--text3);letter-spacing:.5px;margin-bottom:.4rem;display:flex;align-items:center;gap:6px}
+  .q-num .domain-dot{width:6px;height:6px;border-radius:50%;display:inline-block}
+  .q-text{font-size:14px;font-weight:500;line-height:1.55;color:var(--text);margin-bottom:.25rem}
+  .q-sub{font-size:12px;color:var(--text2);font-style:italic;margin-bottom:1rem;line-height:1.5}
+
+  /* LIKERT */
+  .likert-wrap{margin-top:.875rem}
+  .likert-scale{display:flex;gap:8px;align-items:center}
+  .lk-btn{width:42px;height:42px;border-radius:50%;border:1.5px solid var(--border);background:#fafbfc;cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);transition:all .15s;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .lk-btn:hover{border-color:var(--teal);color:var(--teal);background:#f0faf8}
+  .lk-btn.selected{background:var(--teal);border-color:var(--teal);color:#fff;transform:scale(1.08)}
+  .lk-btn.neg.selected{background:var(--red);border-color:var(--red);color:#fff}
+  .likert-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:7px;padding:0 2px}
+
+  /* CHECKBOXES */
+  .cb-group{display:flex;flex-direction:column;gap:10px;margin-top:.5rem}
+  .cb-item{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background .1s}
+  .cb-item:hover{background:#f5f6f9}
+  .cb-item input[type=checkbox]{margin-top:1px;accent-color:var(--teal);width:15px;height:15px;flex-shrink:0;cursor:pointer}
+  .cb-item span{font-size:13px;line-height:1.4;color:var(--text)}
+
+  /* SELECT */
+  select{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:var(--surface);cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235a6070' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+  select:focus{outline:none;border-color:var(--teal)}
+
+  /* TEXTAREA */
+  textarea{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:var(--surface);resize:vertical;min-height:90px;line-height:1.65;margin-top:.5rem}
+  textarea:focus{outline:none;border-color:var(--teal)}
+
+  /* META INPUTS */
+  input[type=text],input[type=email],input[type=date]{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:var(--surface)}
+  input:focus{outline:none;border-color:var(--teal)}
+  .meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+  .field{display:flex;flex-direction:column;gap:5px}
+  .field label{font-size:12px;font-weight:500;color:var(--text2)}
+  .field .required{color:var(--red)}
+
+  /* SUBMIT */
+  .submit-zone{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-top:1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+  .submit-btn{background:var(--navy);color:#fff;border:none;border-radius:8px;padding:12px 32px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .15s}
+  .submit-btn:hover{background:var(--teal)}
+  .submit-btn:disabled{opacity:.45;cursor:not-allowed}
+  .submit-note{font-size:12px;color:var(--text2);line-height:1.5}
+
+  /* SUCCESS */
+  .success-screen{display:none;text-align:center;padding:4rem 2rem;max-width:500px;margin:0 auto}
+  .success-screen.show{display:block}
+  .success-icon{width:64px;height:64px;background:var(--teal-lt);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;font-size:28px}
+  .success-screen h2{font-family:'DM Serif Display',serif;font-size:22px;color:var(--navy);margin-bottom:.5rem}
+  .success-screen p{font-size:14px;color:var(--text2);line-height:1.7}
+  .new-review-btn{margin-top:1.5rem;display:inline-block;padding:10px 24px;background:var(--navy);color:#fff;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;font-family:'DM Sans',sans-serif}
+
+  /* ERROR */
+  .error-msg{font-size:12px;color:var(--red);margin-top:.4rem;display:none}
+  .error-msg.show{display:block}
+
+  /* FOOTER */
+  footer{background:var(--navy);padding:1.25rem 2rem;text-align:center;font-size:12px;color:#5a7090}
+
+  @media(max-width:600px){.meta-grid{grid-template-columns:1fr}.hero-meta{flex-wrap:wrap;gap:1rem}.likert-scale{gap:5px}.lk-btn{width:36px;height:36px;font-size:12px}}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="site-logo">Know<span>Your</span>Person</div>
+  <div class="site-badge">Confidential · Clinical Review</div>
+</header>
+
+<div class="hero">
+  <h1>Clinical Reviewer Assessment</h1>
+  <p>A structured evaluation of the KnowYourPerson relationship health application for clinical professionals. Your expert feedback directly informs the development roadmap.</p>
+  <div class="hero-meta">
+    <span>⏱ Approximately 10–15 minutes</span>
+    <span>🔒 Responses are confidential</span>
+    <span>📋 19 questions across 6 domains</span>
+  </div>
+</div>
+
+<div class="form-wrap">
+
+  <!-- SUCCESS STATE -->
+  <div class="success-screen" id="success-screen">
+    <div class="success-icon">✓</div>
+    <h2>Review submitted</h2>
+    <p>Thank you for your time and clinical expertise. Your assessment has been recorded and will be reviewed by the KYP development team.</p>
+    <button class="new-review-btn" onclick="resetForm()">Submit another review</button>
+  </div>
+
+  <!-- FORM -->
+  <div id="form-body">
+
+    <div class="progress-wrap">
+      <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+      <div class="progress-text" id="prog-text">0 of 15 rated</div>
+    </div>
+
+    <!-- REVIEWER INFO -->
+    <div class="sec-header">
+      <div class="sec-label">Section 1</div>
+      <div class="sec-title">Reviewer Information</div>
+      <div class="sec-desc">Please provide your professional details. This information is kept confidential and used only for demographic analysis.</div>
+    </div>
+    <div class="q-card">
+      <div class="meta-grid">
+        <div class="field"><label>Full name <span class="required">*</span></label><input type="text" id="r-name" placeholder="Dr. Jane Smith"></div>
+        <div class="field"><label>Credentials / title</label><input type="text" id="r-cred" placeholder="PhD, LMFT"></div>
+        <div class="field"><label>Institution / practice</label><input type="text" id="r-inst" placeholder="Boston Medical Center"></div>
+        <div class="field"><label>Review date <span class="required">*</span></label><input type="date" id="r-date"></div>
+        <div class="field"><label>Clinical specialty</label>
+          <select id="r-spec">
+            <option value="">Select specialty</option>
+            <option>Couples and relationship therapy</option>
+            <option>Clinical psychology</option>
+            <option>Psychiatry</option>
+            <option>Social work / LCSW</option>
+            <option>Marriage and family therapy (MFT)</option>
+            <option>Primary care / internal medicine</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="field"><label>Years in practice</label>
+          <select id="r-years">
+            <option value="">Select range</option>
+            <option>1–3 years</option>
+            <option>4–7 years</option>
+            <option>8–15 years</option>
+            <option>16–25 years</option>
+            <option>25+ years</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- DYNAMIC QUESTION SECTIONS -->
+    <div id="q-sections"></div>
+
+    <!-- SUBMIT -->
+    <div class="submit-zone">
+      <div class="submit-note">
+        <strong>Ready to submit?</strong><br>
+        All 15 rating questions must be completed. Written comments are optional but valued.
+      </div>
+      <button class="submit-btn" id="submit-btn" onclick="submitReview()">Submit review →</button>
+    </div>
+    <div class="error-msg" id="submit-err">Please complete all required rating questions before submitting.</div>
+
+  </div><!-- /form-body -->
+</div><!-- /form-wrap -->
+
+<footer>
+  KnowYourPerson Clinical Review Portal &nbsp;·&nbsp; Responses are encrypted in transit and stored securely &nbsp;·&nbsp; <a href="mailto:research@knowyourperson.app">research@knowyourperson.app</a>
+</footer>
+
+<script>
+const API_BASE = ''; // set to your server URL e.g. 'https://your-server.com'
+
+const DOMAINS = [
+  {id:'validity', label:'Content Validity', color:'#0d7a6e'},
+  {id:'safety',   label:'Safety & Risk',    color:'#c0392b'},
+  {id:'usability',label:'Clinical Usability',color:'#1a2744'},
+  {id:'sensitivity',label:'Cultural Sensitivity',color:'#b8912a'},
+  {id:'ethics',   label:'Ethical Standards',color:'#1a6b8a'},
+  {id:'impact',   label:'Therapeutic Impact',color:'#6c3591'},
+];
+
+const FLAG_OPTS = [
+  'Potential to exacerbate interpersonal conflict',
+  'Risk of pathologizing normative relationship variation',
+  'Insufficient crisis/safety resource integration',
+  'Overreliance on self-report without validation caveats',
+  'Privacy or data sensitivity concerns',
+  'Content not appropriate for acute mental health populations',
+  'None identified'
+];
+
+const REC_OPTS = [
+  'Strongly recommend — suitable for broad clinical referral',
+  'Recommend with minor revisions',
+  'Recommend for specific populations only',
+  'Requires major revisions before clinical referral',
+  'Do not recommend in current form'
+];
+
+const QUESTIONS = [
+  {id:'v1',domain:'validity',  text:'The assessment questions adequately capture key dimensions of relationship health relevant to clinical practice.',type:'likert'},
+  {id:'v2',domain:'validity',  text:'The language is appropriately precise and avoids clinical jargon that may confuse lay users.',sub:'Consider terminology, framing, and explanatory text.',type:'likert'},
+  {id:'v3',domain:'validity',  text:'The scoring algorithms and interpretive frameworks appear grounded in evidence-based relationship science.',type:'likert'},
+  {id:'s1',domain:'safety',    text:'The app includes appropriate safeguards for identifying and responding to acute distress or crisis disclosures.',type:'likert'},
+  {id:'s2',domain:'safety',    text:'Results are presented in a manner that minimizes risk of harmful misinterpretation or self-diagnosis.',sub:'E.g., results that could escalate conflict or reinforce maladaptive beliefs.',type:'likert',negative:true},
+  {id:'s3',domain:'safety',    text:'The app appropriately refers users to professional resources when indicated.',type:'likert'},
+  {id:'u1',domain:'usability', text:'A clinician could comfortably recommend this tool as a between-session homework assignment.',type:'likert'},
+  {id:'u2',domain:'usability', text:'The report output would meaningfully contribute to clinical intake or ongoing treatment planning conversations.',type:'likert'},
+  {id:'u3',domain:'usability', text:'The time required to complete the assessment is appropriate for the clinical value delivered.',type:'likert'},
+  {id:'c1',domain:'sensitivity',text:'The assessment accounts for diverse relationship structures and cultural variations in communication norms.',type:'likert'},
+  {id:'c2',domain:'sensitivity',text:'Framing and examples avoid heteronormative, Western-centric, or socioeconomically biased assumptions.',type:'likert',negative:true},
+  {id:'e1',domain:'ethics',    text:'Informed consent and data privacy disclosures are clear, complete, and clinically appropriate.',type:'likert'},
+  {id:'e2',domain:'ethics',    text:'The boundary between psychoeducation and clinical diagnosis is clearly maintained throughout the app.',type:'likert'},
+  {id:'i1',domain:'impact',    text:'Based on the assessment content, users are likely to gain meaningful insight into their relationship patterns.',type:'likert'},
+  {id:'i2',domain:'impact',    text:'The feedback provided is actionable and conducive to positive behavior change.',type:'likert'},
+  {id:'flags',domain:'safety', text:'Please indicate any clinical concerns observed during your review.',type:'checkboxes'},
+  {id:'recommend',domain:'impact',text:'Overall clinical recommendation for the KYP app:',type:'select'},
+  {id:'strengths',domain:'validity',text:'Key clinical strengths of this application:',sub:'Please be specific — this feedback will inform further development.',type:'textarea'},
+  {id:'concerns', domain:'safety',  text:'Primary clinical concerns or recommended revisions:',type:'textarea'},
+  {id:'overall',  domain:'impact',  text:'Overall impressions and any additional commentary for the development team:',type:'textarea'},
+];
+
+let scores = {}, cbSelections = {flags:[]}, textVals = {}, selVals = {};
+
+function buildForm() {
+  const container = document.getElementById('q-sections');
+  const domOrder = ['validity','safety','usability','sensitivity','ethics','impact'];
+  const domLabels = {validity:'Content Validity',safety:'Safety & Risk',usability:'Clinical Usability',sensitivity:'Cultural Sensitivity',ethics:'Ethical Standards',impact:'Therapeutic Impact'};
+  const secNums   = {validity:2,safety:3,usability:4,sensitivity:5,ethics:6,impact:7};
+  let qNum = 1;
+
+  domOrder.forEach(domId => {
+    const dom = DOMAINS.find(d=>d.id===domId);
+    const qs  = QUESTIONS.filter(q=>q.domain===domId);
+    let html  = `<div class="sec-header">
+      <div class="sec-label">Section ${secNums[domId]}</div>
+      <div class="sec-title">${domLabels[domId]}</div>
+    </div>`;
+
+    qs.forEach(q => {
+      html += `<div class="q-card" id="qcard-${q.id}">
+        <div class="q-num"><span class="domain-dot" style="background:${dom.color}"></span>Q${qNum++} &nbsp;·&nbsp; ${dom.label}</div>
+        <div class="q-text">${q.text}</div>
+        ${q.sub ? `<div class="q-sub">${q.sub}</div>` : ''}`;
+
+      if (q.type === 'likert') {
+        html += `<div class="likert-wrap">
+          <div class="likert-scale" id="lk-${q.id}">`;
+        for (let i=1; i<=5; i++)
+          html += `<button class="lk-btn${q.negative?' neg':''}" onclick="setLk('${q.id}',${i},${!!q.negative})">${i}</button>`;
+        html += `</div>
+          <div class="likert-labels"><span>Strongly disagree</span><span>Neither agree nor disagree</span><span>Strongly agree</span></div>
+        </div>`;
+      } else if (q.type === 'checkboxes') {
+        html += `<div class="cb-group">`;
+        FLAG_OPTS.forEach((opt,i) => {
+          html += `<label class="cb-item"><input type="checkbox" onchange="setCb(${i},this.checked)"><span>${opt}</span></label>`;
+        });
+        html += `</div>`;
+      } else if (q.type === 'select') {
+        html += `<select onchange="setSel('${q.id}',this.value)" style="margin-top:.5rem">
+          <option value="">Select an option</option>`;
+        REC_OPTS.forEach(o => { html += `<option>${o}</option>`; });
+        html += `</select>`;
+      } else if (q.type === 'textarea') {
+        html += `<textarea placeholder="Enter your comments here…" oninput="setTxt('${q.id}',this.value)"></textarea>`;
+      }
+
+      html += `</div>`; // close q-card
+    });
+
+    container.innerHTML += html;
+  });
+}
+
+function setLk(id, val, negative) {
+  scores[id] = negative ? (6-val) : val;
+  document.querySelectorAll(`#lk-${id} .lk-btn`).forEach((b,i) => {
+    b.classList.toggle('selected', i+1 === val);
+  });
+  updateProgress();
+}
+function setCb(idx, checked) {
+  if (checked) cbSelections.flags.push(idx);
+  else cbSelections.flags = cbSelections.flags.filter(x=>x!==idx);
+}
+function setTxt(id, val) { textVals[id] = val; }
+function setSel(id, val) { selVals[id]  = val; }
+
+function updateProgress() {
+  const lqs   = QUESTIONS.filter(q=>q.type==='likert');
+  const done  = lqs.filter(q=>scores[q.id]!==undefined).length;
+  const pct   = Math.round(done/lqs.length*100);
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-text').textContent  = `${done} of ${lqs.length} rated`;
+}
+
+function computeDomainScores() {
+  const out = {};
+  DOMAINS.forEach(d => {
+    const vals = QUESTIONS.filter(q=>q.domain===d.id&&q.type==='likert')
+                          .map(q=>scores[q.id]).filter(v=>v!==undefined);
+    out[d.id] = vals.length ? Math.round(vals.reduce((a,b)=>a+b,0)/vals.length*20) : null;
+  });
+  return out;
+}
+
+async function submitReview() {
+  const name = document.getElementById('r-name').value.trim();
+  const date = document.getElementById('r-date').value;
+  const errEl = document.getElementById('submit-err');
+
+  if (!name || !date) { alert('Please enter your name and review date.'); return; }
+
+  const lqs = QUESTIONS.filter(q=>q.type==='likert');
+  if (lqs.filter(q=>scores[q.id]!==undefined).length < lqs.length) {
+    errEl.classList.add('show');
+    document.getElementById('qcard-'+lqs.find(q=>scores[q.id]===undefined).id)
+            .scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+  errEl.classList.remove('show');
+
+  const domScores = computeDomainScores();
+  const vals = Object.values(domScores).filter(v=>v!==null);
+  const avg  = vals.length ? Math.round(vals.reduce((a,b)=>a+b,0)/vals.length) : 0;
+
+  const payload = {
+    name, date,
+    cred:  document.getElementById('r-cred').value,
+    inst:  document.getElementById('r-inst').value,
+    spec:  document.getElementById('r-spec').value,
+    years: document.getElementById('r-years').value,
+    domScores, avg,
+    flags:     cbSelections.flags.filter(i=>i!==6),
+    recommend: selVals['recommend']  || '',
+    strengths: textVals['strengths'] || '',
+    concerns:  textVals['concerns']  || '',
+    overall:   textVals['overall']   || ''
+  };
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
+
+  try {
+    const res = await fetch(API_BASE + '/api/reviews', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error('Server error');
+    document.getElementById('form-body').style.display   = 'none';
+    document.getElementById('success-screen').classList.add('show');
+    window.scrollTo({top:0, behavior:'smooth'});
+  } catch(e) {
+    alert('Submission failed. Please check your connection and try again.\n\nIf the problem persists, contact research@knowyourperson.app');
+    btn.disabled = false;
+    btn.textContent = 'Submit review →';
+  }
+}
+
+function resetForm() {
+  scores = {}; cbSelections = {flags:[]}; textVals = {}; selVals = {};
+  document.getElementById('success-screen').classList.remove('show');
+  document.getElementById('form-body').style.display = '';
+  document.getElementById('q-sections').innerHTML = '';
+  buildForm();
+  document.getElementById('r-name').value = '';
+  document.getElementById('r-date').valueAsDate = new Date();
+  updateProgress();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// Init
+buildForm();
+document.getElementById('r-date').valueAsDate = new Date();
+</script>
+</body>
+</html>
