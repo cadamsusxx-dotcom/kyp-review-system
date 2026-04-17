@@ -12,7 +12,7 @@ const app  = express();
 const PORT = process.env.PORT || 3000;
 
 // ── JSON DATABASE ─────────────────────────────────────────────────────────────
-const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'reviews.json');
+const DB_PATH = process.env.DB_PATH || '/data/reviews.json';
 
 function readDB() {
   try {
