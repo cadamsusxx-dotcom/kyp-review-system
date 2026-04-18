@@ -37,6 +37,17 @@
   .app-link-btn{background:var(--teal);color:#fff;text-decoration:none;padding:10px 22px;border-radius:8px;font-size:13px;font-weight:500;white-space:nowrap;transition:background .15s;display:inline-flex;align-items:center;gap:6px}
   .app-link-btn:hover{background:var(--teal-dk);color:#fff}
 
+  /* KYP SCORES BANNER */
+  .kyp-scores-banner{background:#fff;border:2px solid var(--teal);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;display:none}
+  .kyp-scores-banner.show{display:block}
+  .kyp-scores-title{font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--teal);margin-bottom:.5rem}
+  .kyp-scores-headline{font-size:15px;font-weight:500;color:var(--navy);margin-bottom:.75rem}
+  .kyp-dim-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .kyp-dim-label{font-size:12px;color:var(--text2);width:160px;flex-shrink:0}
+  .kyp-dim-track{flex:1;background:#f0f2f5;border-radius:4px;height:7px;overflow:hidden}
+  .kyp-dim-fill{height:100%;border-radius:4px;background:var(--teal)}
+  .kyp-dim-score{font-size:12px;color:var(--text2);width:30px;text-align:right;flex-shrink:0}
+
   /* LAYOUT */
   .form-wrap{max-width:720px;margin:0 auto;padding:2rem 1rem 4rem}
 
@@ -137,11 +148,18 @@
 
 <div class="app-banner">
   <div class="app-banner-text"><strong>Step 1:</strong> Please explore the KnowYourPerson app before completing this review.</div>
-  <a class="app-link-btn" href="https://scarlet-bridget-65.tiiny.site">Open KnowYourPerson ↗</a>
+  <a class="app-link-btn" href="https://black-milzie-90.tiiny.site" target="_blank">Open KnowYourPerson ↗</a>
   <div class="app-banner-text" style="font-size:12px">When you're ready, complete the questionnaire below.</div>
 </div>
 
 <div class="form-wrap">
+
+  <!-- KYP SCORES BANNER (auto-populated from URL) -->
+  <div class="kyp-scores-banner" id="kyp-scores-banner">
+    <div class="kyp-scores-title">Your KYP Assessment Results</div>
+    <div class="kyp-scores-headline" id="kyp-scores-headline"></div>
+    <div id="kyp-dim-bars"></div>
+  </div>
 
   <!-- SUCCESS STATE -->
   <div class="success-screen" id="success-screen">
@@ -385,7 +403,8 @@ async function submitReview() {
     recommend: selVals['recommend']  || '',
     strengths: textVals['strengths'] || '',
     concerns:  textVals['concerns']  || '',
-    overall:   textVals['overall']   || ''
+    overall:   textVals['overall']   || '',
+    kypScores: kypScores || null
   };
 
   const btn = document.getElementById('submit-btn');
@@ -424,6 +443,40 @@ function resetForm() {
 // Init
 buildForm();
 document.getElementById('r-date').valueAsDate = new Date();
+
+// ── AUTO-POPULATE KYP SCORES FROM URL ─────────────────────────────────────
+let kypScores = null;
+(function() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const raw = params.get('kyp');
+    if (!raw) return;
+    const data = JSON.parse(atob(raw));
+    if (!data || !data.overall) return;
+    kypScores = data;
+
+    const DIM_LABELS = {
+      loveMap: 'Partner Knowledge', conflict: 'Conflict Health',
+      attunement: 'Emotional Attunement', sharedMeaning: 'Shared Meaning',
+      positivity: 'Positive Foundation'
+    };
+    const banner = document.getElementById('kyp-scores-banner');
+    document.getElementById('kyp-scores-headline').textContent =
+      `Overall score: ${data.overall}/100 · ${data.mode === 'couple' ? 'Couples mode' : 'Solo mode'}`;
+    document.getElementById('kyp-dim-bars').innerHTML =
+      Object.entries(data.dimPct).map(([k, v]) => `
+        <div class="kyp-dim-row">
+          <div class="kyp-dim-label">${DIM_LABELS[k] || k}</div>
+          <div class="kyp-dim-track"><div class="kyp-dim-fill" style="width:${v}%"></div></div>
+          <div class="kyp-dim-score">${v}%</div>
+        </div>`).join('');
+    banner.classList.add('show');
+
+    // Also hide the "explore the app first" banner since they already took it
+    const appBanner = document.querySelector('.app-banner');
+    if (appBanner) appBanner.style.display = 'none';
+  } catch(e) {}
+})();
 </script>
 </body>
 </html>
