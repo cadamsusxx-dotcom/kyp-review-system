@@ -1,7 +1,3 @@
-/* KYP → Clinical Survey Bridge
- * Drop this <script src="kyp-inject.js"></script> into the KYP app
- * It watches for results pages and injects the survey button automatically.
- */
 (function() {
   const SURVEY_BASE = 'https://kyp-review-system.onrender.com/survey';
 
