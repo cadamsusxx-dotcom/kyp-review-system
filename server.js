@@ -93,9 +93,10 @@ app.get('/api/stats', (req, res) => {
   res.json({ total: db.reviews.length, composite_avg: avg });
 });
 
-app.get('/survey',    (_, res) => res.sendFile(path.join(__dirname, 'public', 'survey.html')));
-app.get('/dashboard', (_, res) => res.sendFile(path.join(__dirname, 'public', 'dashboard.html')));
-app.get('/',          (_, res) => res.sendFile(path.join(__dirname, 'public', 'survey.html')));
+app.get('/survey',      (_, res) => res.sendFile(path.join(__dirname, 'public', 'survey.html')));
+app.get('/dashboard',   (_, res) => res.sendFile(path.join(__dirname, 'public', 'dashboard.html')));
+app.get('/app-manager', (_, res) => res.sendFile(path.join(__dirname, 'public', 'app-manager.html')));
+app.get('/',            (_, res) => res.sendFile(path.join(__dirname, 'public', 'survey.html')));
 
 // ── APPLICATIONS API ──────────────────────────────────────────────────────────
 
