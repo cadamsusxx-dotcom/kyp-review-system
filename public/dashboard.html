@@ -178,6 +178,7 @@
         <div class="nav-item active" onclick="showPage('overview',this)"><span class="ni">📊</span> Overview</div>
         <div class="nav-item" onclick="showPage('reviews',this)"><span class="ni">📋</span> All Reviews <span class="nav-count" id="nav-count">0</span></div>
         <div class="nav-item" onclick="showPage('flags',this)"><span class="ni">⚑</span> Flags & Concerns</div>
+        <div class="nav-item" onclick="showPage('applications',this)"><span class="ni">👤</span> Applications <span class="nav-count" id="app-count">0</span></div>
       </div>
     </nav>
 
@@ -253,6 +254,23 @@
         </div>
       </div>
 
+      <!-- APPLICATIONS PAGE -->
+      <div class="page" id="page-applications">
+        <div class="page-title">Applications</div>
+        <div class="page-sub">App Manager candidate submissions</div>
+        <div class="toolbar">
+          <input type="text" id="app-search" placeholder="Search by name or email…" oninput="filterApplications()">
+          <select id="app-filter-score" onchange="filterApplications()">
+            <option value="">All scores</option>
+            <option value="high">Strong fit (≥70)</option>
+            <option value="mid">Promising (45–69)</option>
+            <option value="low">Reviewed (&lt;45)</option>
+          </select>
+          <button class="export-btn" onclick="exportApplicationsCSV()">↓ Export CSV</button>
+        </div>
+        <div id="applications-list"></div>
+      </div>
+
     </main>
   </div>
 </div>
@@ -325,9 +343,9 @@ async function loadReviews() {
     const res = await fetch(API_BASE + '/api/reviews');
     allReviews = await res.json();
   } catch(e) {
-    // fallback to localStorage for offline demo
     try { allReviews = JSON.parse(localStorage.getItem('kyp_reviews_v2')||'[]'); } catch(_){}
   }
+  await loadApplications();
   renderAll();
 }
 
@@ -515,6 +533,7 @@ function showPage(id, el) {
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
   el.classList.add('active');
+  if(id==='applications') renderApplications();
 }
 
 // ---- EXPORT ----
@@ -534,6 +553,82 @@ function exportCSV() {
   const a    = document.createElement('a');
   a.href     = URL.createObjectURL(blob);
   a.download = `kyp_clinical_reviews_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+// ── APPLICATIONS ──────────────────────────────────────────────────────────────
+let allApplications = [];
+
+async function loadApplications() {
+  try {
+    const res = await fetch(API_BASE + '/api/applications');
+    allApplications = await res.json();
+  } catch(e) { allApplications = []; }
+  document.getElementById('app-count').textContent = allApplications.length;
+}
+
+function renderApplications() {
+  filterApplications();
+}
+
+function filterApplications() {
+  const search = (document.getElementById('app-search')?.value||'').toLowerCase();
+  const score  = document.getElementById('app-filter-score')?.value||'';
+  let list = allApplications.filter(a => {
+    if (search && !((a.name||'').toLowerCase().includes(search)||(a.Email||'').toLowerCase().includes(search))) return false;
+    const s = parseInt((a.Fit_Score||'0').split('/')[0]);
+    if (score==='high' && s<70) return false;
+    if (score==='mid' && (s<45||s>=70)) return false;
+    if (score==='low' && s>=45) return false;
+    return true;
+  });
+  const el = document.getElementById('applications-list');
+  if (!list.length) { el.innerHTML=`<div class="empty">No applications yet.</div>`; return; }
+  el.innerHTML = list.map(a => {
+    const score = parseInt((a.Fit_Score||'0').split('/')[0]);
+    const sc = score>=70?'sh':score>=45?'sm':'sl';
+    const label = score>=70?'Strong fit':score>=45?'Promising':'Reviewed';
+    return `<div class="rev-row" style="margin-bottom:.75rem">
+      <div class="rev-top">
+        <div>
+          <div class="rev-name">${a.name||a.Name||'—'}</div>
+          <div class="rev-meta">${[a.Email, a.Location, a.Years_Experience, new Date(a.created_at).toLocaleDateString()].filter(Boolean).join(' · ')}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="score-pill ${sc}">${label} · ${score}/100</span>
+          <button class="del-btn" onclick="deleteApplication(${a.id})">✕</button>
+        </div>
+      </div>
+      ${a.Primary_Background?`<div style="font-size:12px;color:var(--text2);margin-bottom:.3rem"><strong>Background:</strong> ${a.Primary_Background}</div>`:''}
+      ${a.Most_Impactful_Product?`<div style="font-size:12px;color:var(--text2);margin-bottom:.3rem"><strong>Most impactful product:</strong> ${a.Most_Impactful_Product.substring(0,200)}${a.Most_Impactful_Product.length>200?'…':''}</div>`:''}
+      ${a.Why_KnowYourPerson?`<div style="font-size:12px;color:var(--teal);margin-bottom:.3rem"><strong>Why KYP:</strong> ${a.Why_KnowYourPerson.substring(0,200)}${a.Why_KnowYourPerson.length>200?'…':''}</div>`:''}
+      ${a.LinkedIn_or_Website?`<div style="font-size:12px;margin-top:.3rem"><a href="${a.LinkedIn_or_Website}" target="_blank" style="color:var(--teal)">${a.LinkedIn_or_Website}</a></div>`:''}
+    </div>`;
+  }).join('');
+}
+
+async function deleteApplication(id) {
+  if (!confirm('Delete this application?')) return;
+  try { await fetch(API_BASE + '/api/applications/' + id, {method:'DELETE'}); } catch(e) {}
+  await loadApplications();
+  filterApplications();
+}
+
+function exportApplicationsCSV() {
+  const headers = ['Date','Name','Email','Location','LinkedIn','Years Experience','Background','Tools','Startup Experience','Tech Comfort','Impact','Why KYP','Responsibilities','Scenario','Founder Style','Hours','Portfolio 1','Portfolio 2','Portfolio 3','Extra','Fit Score'];
+  const rows = allApplications.map(a =>
+    [new Date(a.created_at).toLocaleDateString(), a.name||a.Name, a.Email, a.Location, a.LinkedIn_or_Website,
+     a.Years_Experience, a.Primary_Background, a.Tools_Used, a.Startup_Experience, a.Technical_Comfort_1_to_5,
+     a.Most_Impactful_Product, a.Why_KnowYourPerson, a.Top_Responsibilities, a.Bug_Scenario_Response,
+     a.Preferred_Founder_Relationship, a.Hours_Available_Per_Week, a.Portfolio_Link_1, a.Portfolio_Link_2,
+     a.Portfolio_Link_3, a.What_Doesnt_Show_on_Resume, a.Fit_Score]
+    .map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',')
+  );
+  const csv  = [headers.join(','),...rows].join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = `kyp_applications_${new Date().toISOString().slice(0,10)}.csv`;
   a.click();
 }
 </script>
